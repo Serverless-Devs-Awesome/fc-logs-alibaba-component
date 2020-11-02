@@ -1,0 +1,16 @@
+{
+  "name": "fc-logs-alibaba-component",
+  "version": "0.0.1",
+  "description": "Serverless Devs 函数计算组件 metrics 功能",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish": "script/publish.sh"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@alicloud/fc2": "^2.2.2",
+    "@serverless-devs/s-core": "0.0.22"
+  }
+}
