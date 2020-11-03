@@ -72,8 +72,8 @@ class LogsComponent extends Component {
 
     const args = this.args(inputs.Args, undefined, ['s', 'startTime', 'e', 'endTime'], undefined);
 
+    const cmdParameters = args.Parameters || {};
     const {
-      cmdParameters = {},
       t,
       tail
     } = args.Parameters;
