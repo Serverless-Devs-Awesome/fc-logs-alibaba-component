@@ -10,3 +10,18 @@ Tags:
 Category: 基础云服务
 Commands:
   metrics: 监控组建
+Properties:
+  Region:
+    Description: 地域
+    Required: true
+  Service:
+    Name:
+      Description: 服务名称
+      Required: true
+    Log:
+      Description: 日志配置
+      Required: true
+  Function:
+    Name:
+      Description: 函数名称
+      Required: true
