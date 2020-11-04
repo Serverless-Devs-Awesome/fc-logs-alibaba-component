@@ -10,12 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@alicloud/fc2": "^2.2.2",
+    "@alicloud/log": "^1.2.1",
     "@serverless-devs/s-core": "0.0.22",
     "aliyun-sdk": "^1.12.3",
     "inquirer": "^7.3.3",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
+    "promise-retry": "^2.0.1",
     "uuid-by-string": "^3.0.2"
   }
 }

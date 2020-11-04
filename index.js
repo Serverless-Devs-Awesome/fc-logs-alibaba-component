@@ -47,7 +47,7 @@ class LogsComponent extends Component {
     }
   }
 
-  async logs(inputs) {
+  async logs (inputs) {
     this.help(inputs, getHelp(inputs));
 
     const {
@@ -100,6 +100,21 @@ class LogsComponent extends Component {
 
       logsClient.printLogs(historyLogs)
     }
+  }
+
+  async transformLogConfig(inputs) {
+    const {
+      Properties: properties = {},
+      Credentials: credentials = {}
+    } = inputs;
+    const {
+      Region: region,
+      Service: serviceProp = {},
+    } = properties;
+    const logConfig = serviceProp.Log || {};
+
+    const logsClient = new Logs(credentials, region);
+    return await logsClient.transformLogConfig(logConfig);
   }
 }
 

@@ -1,8 +1,7 @@
 'use strict'
 
-const FC = require('@alicloud/fc2');
-
 const { SLS } = require('aliyun-sdk');
+const Log = require('@alicloud/log');
 
 class Client {
   constructor (credentials, region) {
@@ -15,13 +14,11 @@ class Client {
     this.stsToken = credentials.SecurityToken
   }
 
-  buildFcClient () {
-    return new FC(this.accountId, {
-      accessKeyID: this.accessKeyID,
-      accessKeySecret: this.accessKeySecret,
-      securityToken: this.stsToken,
+  buildLogClient () {
+    return new Log({
       region: this.region,
-      timeout: 6000000
+      accessKeyId: this.accessKeyID,
+      accessKeySecret: this.accessKeySecret
     })
   }
 
