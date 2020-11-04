@@ -2,7 +2,7 @@ Type: Component
 Name: fc-logs-alibaba-component
 Provider:
   - Alibaba
-Version: 0.0.3
+Version: 0.0.4
 Description: Serverless Devs 函数计算组件的日志功能
 HomePage: https://github.com/Serverless-Devs
 Tags:
