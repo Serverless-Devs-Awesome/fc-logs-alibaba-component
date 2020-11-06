@@ -1,13 +1,6 @@
-const Logger = require('./logger');
 
 class ServerlessError {
-  constructor(e, throwError = true) {
-    const logger = new Logger();
-    if (!throwError) {
-      logger.error(message);
-      return;
-    }
-
+  constructor(e) {
     if (e instanceof Error) {
       throw e;
     } else {

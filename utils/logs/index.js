@@ -272,7 +272,7 @@ class Logs extends Client {
           new ServerlessError({
             message: `Log Service '${projectName}' may create by others, you should use a unique project name.`,
             name: 'Unauthorized'
-          }, true);
+          });
         } else if (ex.code !== 'ProjectNotExist') {
           this.logger.log(`error when getProject, projectName is ${projectName}, error is: \n${ex}`);
           this.logger.info(`Retry ${times} times`)
@@ -293,20 +293,20 @@ class Logs extends Client {
         if (ex.code === 'InvalidAccessKeyId') {
           new ServerlessError({
             message: 'Failed to create sls project for log, error code is InvalidAccessKeyId, please confirm that you had enabled sls service: https://sls.console.aliyun.com/'
-          }, true);
-          new ServerlessError(ex, true);
+          });
+          new ServerlessError(ex);
         } else if (ex.code === 'Unauthorized') {
-          new ServerlessError(ex, true);
+          new ServerlessError(ex);
         } else if (ex.code === 'ProjectAlreadyExist') {
           new ServerlessError({
             message: `error: sls project ${projectName} already exist, it may be in other region or created by other users.`,
             name: 'ProjectAlreadyExist'
-          }, true);
+          });
         } else if (ex.code === 'ProjectNotExist') {
           new ServerlessError({
             message: `Please go to https://sls.console.aliyun.com/ to open the LogServce.`,
             name: 'ProjectNotExist'
-          }, true);
+          });
         } else {
           this.logger.warn(`Error when createProject, projectName is ${projectName}, error is: ${ex}`)
           this.logger.warn(`Retry ${times} times`)
@@ -347,7 +347,7 @@ class Logs extends Client {
           this.logger.info('Default log store generated');
         } catch (ex) {
           if (ex.code === 'Unauthorized') {
-            new ServerlessError(ex, true);
+            new ServerlessError(ex);
           }
           this.logger.log(`error when createLogStore, projectName is ${projectName}, logstoreName is ${logStoreName}, error is: \n${ex}`);
           this.logger.info(`Retry ${times} times`);
@@ -365,13 +365,13 @@ class Logs extends Client {
         } catch (ex) {
           this.logger.log(`error when updateLogStore, projectName is ${projectName}, logstoreName is ${logStoreName}, error is: \n${ex}`);
           if (ex.code === 'Unauthorized') {
-            new ServerlessError(ex, true);
+            new ServerlessError(ex);
           }
           if (ex.code !== 'ParameterInvalid' && ex.message !== 'no parameter changed') {
             this.logger.info(`Retry ${times} times`)
             retry(ex)
           } else {
-            new ServerlessError(ex, true);
+            new ServerlessError(ex);
           }
         }
       })
@@ -388,7 +388,7 @@ class Logs extends Client {
         } catch (ex) {
           if (ex.code !== 'IndexConfigNotExist') {
             this.logger.log(`error when getIndexConfig, projectName is ${projectName}, logstoreName is ${logstoreName}, error is: \n${ex}`);
-            new ServerlessError(ex, true);
+            new ServerlessError(ex);
           }
         }
 

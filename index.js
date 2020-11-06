@@ -14,28 +14,28 @@ class LogsComponent extends Component {
 
   checkInput (region, serviceName, functionName, logConfig) {
     if (!region) {
-      new ServerlessError({ code: 'RegionNotFount', message: 'Region is empty.' }, true)
+      new ServerlessError({ code: 'RegionNotFount', message: 'Region is empty.' })
     }
 
     if (!serviceName) {
       new ServerlessError({
         code: 'ServiceNameNotFount',
         message: 'Service Name is empty.'
-      }, true);
+      });
     }
 
     if (!functionName) {
       new ServerlessError({
         code: 'FunctionNameNotFount',
         message: 'Function Name is empty.'
-      }, true);
+      });
     }
 
     if (!logConfig) {
       new ServerlessError({
         code: 'LogNotFount',
         message: 'Log config is empty.'
-      }, true);
+      });
     }
     const isAuto = typeof logConfig === 'string' && logConfig !== 'Auto';
     const isObj = typeof logConfig !== 'string' && !(logConfig.Project && logConfig.LogStore)
@@ -43,7 +43,7 @@ class LogsComponent extends Component {
       new ServerlessError({
         code: 'LogConfigError',
         message: 'Missing Log definition in template.yml.\nRefer to https://github.com/Serverless-Devs-Awesome/fc-alibaba-component#log'
-      }, true);
+      });
     }
   }
 
