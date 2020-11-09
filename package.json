@@ -16,7 +16,6 @@
     "inquirer": "^7.3.3",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
-    "promise-retry": "^2.0.1",
-    "uuid-by-string": "^3.0.2"
+    "promise-retry": "^2.0.1"
   }
 }

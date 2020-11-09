@@ -28,8 +28,8 @@ class LogsComponent extends Component {
     } = properties;
 
     const logsClient = new Logs(credentials, region);
-    const projectName = logConfig.ProjectName;
-    const logStoreName = logConfig.LogStoreName;
+    const projectName = logConfig.Project;
+    const logStoreName = logConfig.LogStore;
 
     const args = this.args(inputs.Args, undefined, ['s', 'startTime', 'e', 'endTime'], undefined);
     const cmdParameters = args.Parameters || {};
@@ -71,6 +71,20 @@ class LogsComponent extends Component {
 
     const logsClient = new Logs(credentials, region);
     return await logsClient.initLogConfig(logConfig);
+  }
+
+  async remove (inputs) {
+    const {
+      Properties: properties = {},
+      Credentials: credentials = {}
+    } = inputs;
+    const {
+      Region: region,
+      LogConfig: logConfig,
+    } = properties;
+
+    const logsClient = new Logs(credentials, region);
+    return await logsClient.removeProject(logConfig.Project);
   }
 }
 

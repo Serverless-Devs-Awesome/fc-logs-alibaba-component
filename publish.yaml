@@ -2,7 +2,7 @@ Type: Component
 Name: fc-logs-alibaba-component
 Provider:
   - Alibaba
-Version: 0.0.4
+Version: 0.0.5
 Description: Serverless Devs 函数计算组件的日志功能
 HomePage: https://github.com/Serverless-Devs
 Tags:
@@ -10,18 +10,22 @@ Tags:
 Category: 基础云服务
 Commands:
   logs: 查看日志
+  create: 创建日志项目/仓库
+  remove: 删除日志项目
 Properties:
   Region:
     Description: 地域
     Required: true
-  Service:
-    Name:
-      Description: 服务名称
+  LogConfig:
+    Project:
+      Description: 项目名称
       Required: true
-    Log:
-      Description: 日志配置
-      Required: true
-  Function:
-    Name:
-      Description: 函数名称
-      Required: true
+    LogStore:
+      Description: 仓库名称【创建/查看日志时必填】
+      Required: false
+    Topic:
+      Description: 【查看日志时必填】
+      Required: false
+    Query:
+      Description: 【查看日志时必填】
+      Required: false

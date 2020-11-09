@@ -1,6 +1,5 @@
 const _ = require('lodash');
 
-const getUuid = require('uuid-by-string');
 const moment = require('moment');
 const Logger = require('../logger');
 const Client = require('./client');
@@ -17,11 +16,6 @@ function promiseRetry (fn) {
   return retry(fn, retryOptions)
 }
 
-const isLogConfigAuto = (logConfig) => logConfig === 'Auto';
-const generateDefaultLogConfig = (accountId, region) => ({
-  project: `aliyun-fc-${region}-${getUuid(accountId)}`,
-  logStore: 'function-log'
-})
 const replaceLineBreak = (logsList = {}) => {
   return _.mapValues(logsList, (value, key) => {
     value.message = value.message.replace(new RegExp(/(\r)/g), '\n');
@@ -237,7 +231,7 @@ class Logs extends Client {
 
     return {
       project: projectName,
-      logstore: logStoreName
+      logStore: logStoreName
     }
   }
 
@@ -388,8 +382,8 @@ class Logs extends Client {
           }
         }
 
-        // create default logstore index. index configuration is same with sls console.
-        this.logger.log(`logstore index not exist, try to create a default index for project ${projectName} logstore ${logstoreName}`);
+        // create default logStore index. index configuration is same with sls console.
+        this.logger.log(`logStore index not exist, try to create a default index for project ${projectName} logStore ${logstoreName}`);
         this.logger.info('Generating log store index');
         await this.logClient.createIndex(projectName, logstoreName, {
           ttl: 10,
@@ -400,7 +394,7 @@ class Logs extends Client {
           }
         });
         this.logger.info('Log store index generated');
-        this.logger.log(`create default index success for project ${projectName} logstore ${logstoreName}`);
+        this.logger.log(`create default index success for project ${projectName} logStore ${logstoreName}`);
       } catch (ex) {
         this.logger.log(`error when createIndex, projectName is ${projectName}, logstoreName is ${logstoreName}, error is: \n${ex}`);
 
@@ -408,6 +402,18 @@ class Logs extends Client {
         retry(ex);
       }
     })
+  }
+
+  /**
+   * 删除日志项目
+   */
+  async removeProject (projectName) {
+    const projectExist = await this.slsProjectExist(projectName);
+    if (!projectExist) { return };
+
+    this.logger.info(`Deleting sls project: ${projectName}`);
+    await this.logClient.deleteProject(projectName);
+    this.logger.success('Delete sls project successfully.');
   }
 }
 
