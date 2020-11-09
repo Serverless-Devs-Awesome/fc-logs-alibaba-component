@@ -12,41 +12,6 @@ class LogsComponent extends Component {
     this.logger = new Logger()
   }
 
-  checkInput (region, serviceName, functionName, logConfig) {
-    if (!region) {
-      new ServerlessError({ code: 'RegionNotFount', message: 'Region is empty.' })
-    }
-
-    if (!serviceName) {
-      new ServerlessError({
-        code: 'ServiceNameNotFount',
-        message: 'Service Name is empty.'
-      });
-    }
-
-    if (!functionName) {
-      new ServerlessError({
-        code: 'FunctionNameNotFount',
-        message: 'Function Name is empty.'
-      });
-    }
-
-    if (!logConfig) {
-      new ServerlessError({
-        code: 'LogNotFount',
-        message: 'Log config is empty.'
-      });
-    }
-    const isAuto = typeof logConfig === 'string' && logConfig !== 'Auto';
-    const isObj = typeof logConfig !== 'string' && !(logConfig.Project && logConfig.LogStore)
-    if (isAuto || isObj) {
-      new ServerlessError({
-        code: 'LogConfigError',
-        message: 'Missing Log definition in template.yml.\nRefer to https://github.com/Serverless-Devs-Awesome/fc-alibaba-component#log'
-      });
-    }
-  }
-
   async logs (inputs) {
     this.help(inputs, getHelp(inputs));
 
@@ -57,28 +22,20 @@ class LogsComponent extends Component {
 
     const {
       Region: region,
-      Service: serviceProp = {},
-      Function: functionProp = {}
+      LogConfig: logConfig,
+      Topic: topic,
+      Query: query
     } = properties;
-    const serviceName = serviceProp.Name;
-    const logConfig = serviceProp.Log;
-    const functionName = functionProp.Name;
-
-    this.checkInput(region, serviceName, functionName, logConfig);
-    
 
     const logsClient = new Logs(credentials, region);
-    const { projectName, logStoreName } = logsClient.processLogAutoIfNeed(logConfig);
+    const projectName = logConfig.ProjectName;
+    const logStoreName = logConfig.LogStoreName;
 
     const args = this.args(inputs.Args, undefined, ['s', 'startTime', 'e', 'endTime'], undefined);
-
     const cmdParameters = args.Parameters || {};
-    const {
-      t,
-      tail
-    } = args.Parameters;
+    const { t, tail } = args.Parameters;
     if (t || tail) {
-      await logsClient.realtime(projectName, logStoreName, serviceName, functionName)
+      await logsClient.realtime(projectName, logStoreName, topic, query);
     } else {
       let from = moment().subtract(20, 'minutes').unix();
       let to = moment().unix();
@@ -90,31 +47,30 @@ class LogsComponent extends Component {
         this.logger.warn('By default, find logs within 20 minutes...\n');
       }
 
-      const query = cmdParameters.k || cmdParameters.keyword;
+      const keyword = cmdParameters.k || cmdParameters.keyword;
       const type = cmdParameters.t || cmdParameters.type;
       const requestId = cmdParameters.r || cmdParameters.requestId;
 
       const queryErrorLog = type === 'failed';
 
-      const historyLogs = await logsClient.history(projectName, logStoreName, from, to, serviceName, functionName, query, queryErrorLog, requestId)
+      const historyLogs = await logsClient.history(projectName, logStoreName, from, to, topic, query, keyword, queryErrorLog, requestId)
 
       logsClient.printLogs(historyLogs)
     }
   }
 
-  async transformLogConfig(inputs) {
+  async create (inputs) {
     const {
       Properties: properties = {},
       Credentials: credentials = {}
     } = inputs;
     const {
       Region: region,
-      Service: serviceProp = {},
+      LogConfig: logConfig,
     } = properties;
-    const logConfig = serviceProp.Log || {};
 
     const logsClient = new Logs(credentials, region);
-    return await logsClient.transformLogConfig(logConfig);
+    return await logsClient.initLogConfig(logConfig);
   }
 }
 

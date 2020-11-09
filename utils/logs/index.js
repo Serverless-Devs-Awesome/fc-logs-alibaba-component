@@ -49,36 +49,20 @@ class Logs extends Client {
     })
   }
 
-  // 计算日志仓库名称
-  processLogAutoIfNeed (logConfig) {
-    let projectName;
-    let logStoreName;
-
-    if (isLogConfigAuto(logConfig)) {
-      const defaultLogConfig = generateDefaultLogConfig(this.accountId, this.region);
-
-      projectName = defaultLogConfig.project;
-      logStoreName = defaultLogConfig.logStore;
-    } else {
-      projectName = logConfig.Project;
-      logStoreName = logConfig.LogStore;
-    }
-
-    return { projectName, logStoreName };
-  }
-
-  // 条件过滤
-  filterByKeywords (logsList = {}, { requestId, query, queryErrorLog = false }) {
+  /**
+   * 过滤日志信息
+   */
+  filterByKeywords (logsList = {}, { requestId, keyword, queryErrorLog = false }) {
     let logsClone = _.cloneDeep(logsList)
 
     if (requestId) {
       logsClone = _.pick(logsClone, [requestId])
     }
 
-    if (query) {
+    if (keyword) {
       logsClone = _.pickBy(logsClone, (value, key) => {
         const replaceLog = value.message.replace(new RegExp(/(\r)/g), '\n')
-        return replaceLog.indexOf(query) !== -1
+        return replaceLog.indexOf(keyword) !== -1
       })
     }
 
@@ -92,15 +76,17 @@ class Logs extends Client {
     return logsClone
   }
 
-  // 获取日志
-  async getLogs ({ projectName, logStoreName, timeStart, timeEnd, serviceName, functionName }) {
+  /**
+   * 获取日志
+   */
+  async getLogs ({ projectName, logStoreName, timeStart, timeEnd, topic, query }) {
     const requestParams = {
       projectName,
       logStoreName,
+      topic,
+      query,
       from: timeStart,
-      to: timeEnd,
-      topic: serviceName,
-      query: functionName
+      to: timeEnd
     }
 
     let count;
@@ -156,8 +142,14 @@ class Logs extends Client {
     return result;
   }
 
-  // 实时获取日志
-  async realtime (projectName, logStoreName, serviceName, functionName) {
+  /**
+   * 获取实时日志
+   * @param {*} projectName 
+   * @param {*} logStoreName 
+   * @param {*} topic 
+   * @param {*} query 
+   */
+  async realtime (projectName, logStoreName, topic, query) {
     let timeStart;
     let timeEnd;
     let times = 1800;
@@ -176,8 +168,8 @@ class Logs extends Client {
         logStoreName,
         timeStart,
         timeEnd,
-        serviceName,
-        functionName
+        topic,
+        query
       });
 
       if (_.isEmpty(pulledlogs)) { continue }
@@ -200,49 +192,53 @@ class Logs extends Client {
     }
   }
 
-  // 获取历史日志
-  async history (projectName, logStoreName, timeStart, timeEnd, serviceName, functionName, query, queryErrorLog = false, requestId) {
+  /**
+   * 获取历史日志
+   * @param {*} projectName 
+   * @param {*} logStoreName 
+   * @param {*} timeStart 
+   * @param {*} timeEnd 
+   * @param {*} topic 
+   * @param {*} query 
+   * @param {*} keyword 关键字过滤
+   * @param {*} queryErrorLog 
+   * @param {*} requestId 
+   */
+  async history (projectName, logStoreName, timeStart, timeEnd, topic, query, keyword, queryErrorLog = false, requestId) {
     const logsList = await this.getLogs({
       timeStart,
       timeEnd,
       projectName,
       logStoreName,
-      serviceName,
-      functionName
+      topic,
+      query
     })
 
-    return this.filterByKeywords(replaceLineBreak(logsList), { query, requestId, queryErrorLog })
+    return this.filterByKeywords(replaceLineBreak(logsList), { keyword, requestId, queryErrorLog })
   }
 
-  // 初始化日志
-  async transformLogConfig (logConfig) {
-    if (isLogConfigAuto(logConfig)) {
-      const defaultLogConfig = generateDefaultLogConfig(this.accountId, this.region);
+  /**
+   * 初始化日志配置
+   * @param {*} logConfig 
+   */
+  async initLogConfig (logConfig) {
+    const {
+      Project: projectName,
+      LogStore: logStoreName,
+      Description: description
+    } = logConfig;
 
-      this.logger.info('using \'Log: Auto\'');
-      const description = 'create default log project by serverless tool';
-      await this.makeSls(defaultLogConfig.project, description, defaultLogConfig.logStore);
-      this.logger.info(`Default sls project: ${defaultLogConfig.project}, logStore: ${defaultLogConfig.logStore}`);
-
-      return defaultLogConfig
-    }
-
-    return {
-      project: logConfig.Project || '',
-      logstore: logConfig.LogStore || ''
-    }
-  }
-
-  // 处理日志
-  async makeSls (projectName, description, logStoreName) {
-    await this.makeSlsProject(projectName, description)
-
+    await this.makeSlsProject(projectName, description);
     await this.makeLogstore({
       projectName,
       logStoreName
-    })
+    });
+    await this.makeLogstoreIndex(projectName, logStoreName);
 
-    await this.makeLogstoreIndex(projectName, logStoreName)
+    return {
+      project: projectName,
+      logstore: logStoreName
+    }
   }
 
   // 处理日志项目
